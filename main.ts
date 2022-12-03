@@ -37,7 +37,7 @@ class MyStack extends TerraformStack {
     const nodejs_bq_function = new google.cloudfunctions2Function.Cloudfunctions2Function(this, 'nodejs-bq-function', {
       buildConfig: {
         entryPoint: 'helloBigQuery',
-        runtime: 'nodejs',
+        runtime: 'nodejs16',
         source: {
           storageSource: {
             bucket: source_bucket.name,
