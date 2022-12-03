@@ -34,6 +34,16 @@ class MyStack extends TerraformStack {
       name: `${source_asset.assetHash}.zip`,
     });
 
+    const cloudfunction_runner = new google.serviceAccount.ServiceAccount(this, 'cloudfunction-runner', {
+      accountId: 'cloudfunction-runner',
+    });
+
+    new google.projectIamBinding.ProjectIamBinding(this, 'cloudfunction-bigquery-view', {
+      members: [`serviceAccount:${cloudfunction_runner.email}`],
+      project,
+      role: 'roles/bigquery.user',
+    });
+
     const nodejs_bq_function = new google.cloudfunctions2Function.Cloudfunctions2Function(this, 'nodejs-bq-function', {
       buildConfig: {
         entryPoint: 'helloBigQuery',
@@ -47,6 +57,9 @@ class MyStack extends TerraformStack {
       },
       location: region,
       name: 'nodejs-bq-function',
+      serviceConfig: {
+        serviceAccountEmail: cloudfunction_runner.email,
+      },
     });
 
     const noauth_data = new google.dataGoogleIamPolicy.DataGoogleIamPolicy(this, 'noauth-data', {
