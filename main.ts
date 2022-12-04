@@ -24,7 +24,7 @@ class MyStack extends TerraformStack {
     });
 
     const source_asset = new TerraformAsset(this, 'source-asset', {
-      path: path.resolve('orig'),
+      path: path.resolve('hellobq'),
       type: AssetType.ARCHIVE,
     });
 
@@ -44,10 +44,10 @@ class MyStack extends TerraformStack {
       role: 'roles/bigquery.user',
     });
 
-    const nodejs_bq_function = new google.cloudfunctions2Function.Cloudfunctions2Function(this, 'nodejs-bq-function', {
+    const nodejs_bq_function = new google.cloudfunctions2Function.Cloudfunctions2Function(this, 'go-bq-function', {
       buildConfig: {
-        entryPoint: 'helloBigQuery',
-        runtime: 'nodejs16',
+        entryPoint: 'helloBq',
+        runtime: 'go119',
         source: {
           storageSource: {
             bucket: source_bucket.name,
@@ -56,8 +56,11 @@ class MyStack extends TerraformStack {
         },
       },
       location: region,
-      name: 'nodejs-bq-function',
+      name: 'go-bq-function',
       serviceConfig: {
+        environmentVariables: {
+          'PROJECT_ID': project,
+        },
         serviceAccountEmail: cloudfunction_runner.email,
       },
     });
