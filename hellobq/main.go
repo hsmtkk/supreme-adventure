@@ -1,6 +1,7 @@
 package hellobq
 
 import (
+	"encoding/json"
 	"log"
 	"net/http"
 	"os"
@@ -38,6 +39,7 @@ func helloBq(w http.ResponseWriter, r *http.Request) {
 		log.Printf("bigquery.Query.Read failed; %v", err.Error())
 		return
 	}
+	valuesArray := [][]bigquery.Value{}
 	for {
 		var values []bigquery.Value
 		err := iter.Next(&values)
@@ -50,6 +52,18 @@ func helloBq(w http.ResponseWriter, r *http.Request) {
 			log.Printf("iteration failed; %v", err.Error())
 			continue
 		}
+		valuesArray = append(valuesArray, values)
 		log.Printf("values: %v", values)
 	}
+	resp, err := json.Marshal(valuesArray)
+	if err != nil {
+		w.WriteHeader(http.StatusInternalServerError)
+		w.Write([]byte(err.Error()))
+		log.Printf("json.Marshal failed; %v", err.Error())
+		return
+	}
+	w.WriteHeader(http.StatusOK)
+	header := w.Header()
+	header.Add("Content-Type", "application/json")
+	w.Write(resp)
 }
